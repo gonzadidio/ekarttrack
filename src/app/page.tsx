@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   Zap, Timer, Trophy, Clock, Users, Shield, Leaf, Gauge, Battery, Wifi,
@@ -180,6 +180,11 @@ function SectionHeading({ tag, title, accent, children }: { tag: string; title: 
 /* ═══════════════════════════════════════════════════════════ */
 
 export default function V2Page() {
+  const [showSemaphore, setShowSemaphore] = useState(true);
+  const handleSemaphoreComplete = useCallback(() => {
+    setTimeout(() => setShowSemaphore(false), 500);
+  }, []);
+
   return (
     <>
       <style jsx global>{`
@@ -332,6 +337,11 @@ export default function V2Page() {
         ::-webkit-scrollbar-thumb { background: #FF2D78; border-radius: 0; }
       `}</style>
 
+      {/* ═══════════ SEMAPHORE INTRO ═══════════ */}
+      <AnimatePresence>
+        {showSemaphore && <SemaphoreOverlay onComplete={handleSemaphoreComplete} />}
+      </AnimatePresence>
+
       <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#050510", color: "#fff" }}>
         {/* ═══════════ HERO ═══════════ */}
         <HeroSection />
@@ -357,6 +367,194 @@ export default function V2Page() {
         </footer>
       </div>
     </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/*                  SEMAPHORE INTRO OVERLAY                   */
+/* ═══════════════════════════════════════════════════════════ */
+
+function SemaphoreOverlay({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase] = useState(0); // 0=waiting, 1=red, 2=yellow, 3=green, 4=go-flash, 5=done
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), 400),
+      setTimeout(() => setPhase(2), 1400),
+      setTimeout(() => setPhase(3), 2400),
+      setTimeout(() => setPhase(4), 2900),
+      setTimeout(() => { setPhase(5); onComplete(); }, 3600),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [onComplete]);
+
+  if (phase === 5) return null;
+
+  const lights = [
+    { color: "#FF2D78", shadow: "rgba(255,45,120,0.8)", label: "READY", activeAt: 1 },
+    { color: "#FFB800", shadow: "rgba(255,184,0,0.8)", label: "STEADY", activeAt: 2 },
+    { color: "#00FF87", shadow: "rgba(0,255,135,0.8)", label: "GO!", activeAt: 3 },
+  ];
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      style={{ background: "#050510" }}
+      exit={{ opacity: 0, scale: 1.1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+    >
+      {/* Background pulse on GO */}
+      {phase >= 4 && (
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.3, 0] }}
+          transition={{ duration: 0.6 }}
+          style={{ background: "radial-gradient(circle, rgba(0,255,135,0.15) 0%, transparent 70%)" }}
+        />
+      )}
+
+      {/* Scanlines */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)",
+      }} />
+
+      {/* Semaphore housing */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative"
+      >
+        {/* Housing frame */}
+        <div className="relative px-8 py-6" style={{
+          background: "linear-gradient(180deg, #0A0A1A 0%, #050510 100%)",
+          border: "2px solid rgba(255,45,120,0.3)",
+          clipPath: "polygon(15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px), 0 15px)",
+        }}>
+          <CyberCorners color="#FF2D78" size={15} />
+
+          {/* Top label */}
+          <div className="text-center mb-6">
+            <span className="text-[10px] uppercase tracking-[0.4em] font-mono" style={{ color: "rgba(255,45,120,0.5)" }}>
+              // SYSTEM_INIT
+            </span>
+          </div>
+
+          {/* Lights */}
+          <div className="flex gap-8 items-center justify-center">
+            {lights.map((light, i) => {
+              const isActive = phase >= light.activeAt;
+              const isCurrent = phase === light.activeAt || (phase === 4 && i === 2);
+              return (
+                <motion.div key={i} className="flex flex-col items-center gap-3">
+                  {/* Light circle */}
+                  <motion.div
+                    className="relative"
+                    animate={isCurrent ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 0.3, repeat: isCurrent && i === 2 ? 2 : 0 }}
+                  >
+                    {/* Outer ring */}
+                    <div
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
+                      style={{
+                        border: `2px solid ${isActive ? light.color : "rgba(255,255,255,0.08)"}`,
+                        background: isActive
+                          ? `radial-gradient(circle, ${light.color}20 0%, transparent 70%)`
+                          : "rgba(255,255,255,0.02)",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      {/* Inner light */}
+                      <motion.div
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
+                        animate={isActive ? {
+                          background: light.color,
+                          boxShadow: `0 0 20px ${light.shadow}, 0 0 40px ${light.shadow}, 0 0 80px ${light.shadow}`,
+                        } : {
+                          background: "rgba(255,255,255,0.03)",
+                          boxShadow: "none",
+                        }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+
+                    {/* Glow halo */}
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full"
+                        initial={{ opacity: 0, scale: 1 }}
+                        animate={{ opacity: [0.6, 0], scale: [1, 1.8] }}
+                        transition={{ duration: 0.8 }}
+                        style={{ background: `radial-gradient(circle, ${light.shadow}, transparent 70%)` }}
+                      />
+                    )}
+                  </motion.div>
+
+                  {/* Label */}
+                  <motion.span
+                    className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] font-mono"
+                    animate={{
+                      color: isActive ? light.color : "rgba(255,255,255,0.1)",
+                      textShadow: isActive ? `0 0 10px ${light.shadow}` : "none",
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {light.label}
+                  </motion.span>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-6 h-[2px] overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <motion.div
+              className="h-full"
+              initial={{ width: "0%" }}
+              animate={{ width: phase >= 4 ? "100%" : `${(phase / 3) * 100}%` }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              style={{
+                background: phase >= 3
+                  ? "linear-gradient(90deg, #FF2D78, #FFB800, #00FF87)"
+                  : "linear-gradient(90deg, #FF2D78, #00B4D8)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Side decorations */}
+        <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-[2px] h-16" style={{
+          background: `linear-gradient(180deg, transparent, ${phase >= 1 ? "#FF2D78" : "rgba(255,255,255,0.05)"}, transparent)`,
+        }} />
+        <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-[2px] h-16" style={{
+          background: `linear-gradient(180deg, transparent, ${phase >= 1 ? "#FF2D78" : "rgba(255,255,255,0.05)"}, transparent)`,
+        }} />
+      </motion.div>
+
+      {/* GO flash text */}
+      <AnimatePresence>
+        {phase === 4 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 2 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="absolute mt-48 sm:mt-56"
+          >
+            <span
+              className="text-5xl sm:text-7xl font-black uppercase tracking-[0.3em]"
+              style={{
+                color: "#00FF87",
+                textShadow: "0 0 20px rgba(0,255,135,0.8), 0 0 60px rgba(0,255,135,0.4), 0 0 100px rgba(0,255,135,0.2)",
+              }}
+            >
+              GO!
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 

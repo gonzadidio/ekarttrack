@@ -5,7 +5,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   Zap, Timer, Trophy, Clock, Users, Shield, Leaf, Gauge, Battery, Wifi,
-  Volume2, Check, Star, Medal, TrendingUp, Camera, Send, MapPin, Phone,
+  Volume2, Check, Star, Medal, TrendingUp, Send, MapPin, Phone,
   Mail, ChevronDown, Sparkles, GraduationCap, PartyPopper,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -108,12 +108,12 @@ const topTimes = [
 ];
 
 const galleryImages = [
-  { id: 1, title: "Recta Principal", category: "Pista" },
-  { id: 2, title: "Curva del Lago", category: "Pista" },
-  { id: 3, title: "Zona de Boxes", category: "Instalaciones" },
-  { id: 4, title: "Largada Nocturna", category: "Eventos" },
-  { id: 5, title: "Podio Grupal", category: "Eventos" },
-  { id: 6, title: "Kart Electrico Pro", category: "Kartings" },
+  { id: 1, title: "Kart en Pista", category: "Pista", src: "/img/E-Kart-Track-1.jpeg" },
+  { id: 2, title: "Vista del Circuito", category: "Pista", src: "/img/Gemini_Generated_Image_31gewq31gewq31ge.png" },
+  { id: 3, title: "Zona de Carrera", category: "Pista", src: "/img/Gemini_Generated_Image_o63b8vo63b8vo63b.png" },
+  { id: 4, title: "Experiencia Nocturna", category: "Eventos", src: "/img/ChatGPT-Image-24-mar-2026-07_33_10-p.m.png" },
+  { id: 5, title: "Nuestras Instalaciones", category: "Instalaciones", src: "/img/WhatsApp-Image-2026-03-17-at-19.53.37.jpeg" },
+  { id: 6, title: "Kart Electrico", category: "Kartings", src: "/img/unnamed.jpg" },
 ];
 
 const contactInfo = [
@@ -1166,35 +1166,20 @@ function GaleriaSection() {
                 clipPath: "polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px))",
               }}
             >
-              {/* Background */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(135deg, ${accentColors[i % 3]}22, ${accentColors[(i + 1) % 3]}11)`,
-                }}
+              {/* Real image */}
+              <img
+                src={img.src}
+                alt={img.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
 
-              {/* Scanline pattern */}
+              {/* Scanline overlay */}
               <div
-                className="absolute inset-0 opacity-30"
+                className="absolute inset-0 opacity-30 pointer-events-none"
                 style={{
                   background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px)",
                 }}
               />
-
-              {/* Grid pattern */}
-              <div
-                className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage: `linear-gradient(${accentColors[i % 3]}15 1px, transparent 1px), linear-gradient(90deg, ${accentColors[i % 3]}15 1px, transparent 1px)`,
-                  backgroundSize: "30px 30px",
-                }}
-              />
-
-              {/* Center icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="w-10 h-10 transition-all group-hover:scale-110 group-hover:opacity-50" style={{ color: `${accentColors[i % 3]}44` }} />
-              </div>
 
               {/* Hover overlay */}
               <div

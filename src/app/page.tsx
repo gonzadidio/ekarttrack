@@ -434,12 +434,8 @@ function SemaphoreOverlay({ onComplete }: { onComplete: () => void }) {
         }}>
           <CyberCorners color="#FF2D78" size={15} />
 
-          {/* Top label */}
-          <div className="text-center mb-6">
-            <span className="text-[10px] uppercase tracking-[0.4em] font-mono" style={{ color: "rgba(255,45,120,0.5)" }}>
-              // SYSTEM_INIT
-            </span>
-          </div>
+          {/* Top spacer */}
+          <div className="mb-4" />
 
           {/* Lights */}
           <div className="flex gap-8 items-center justify-center">
@@ -532,21 +528,23 @@ function SemaphoreOverlay({ onComplete }: { onComplete: () => void }) {
         }} />
       </motion.div>
 
-      {/* GO flash text */}
+      {/* GO flash text - full screen takeover */}
       <AnimatePresence>
         {phase === 4 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 2 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="absolute mt-48 sm:mt-56"
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 3 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
           >
             <span
-              className="text-5xl sm:text-7xl font-black uppercase tracking-[0.3em]"
+              className="text-[8rem] sm:text-[12rem] lg:text-[16rem] font-black uppercase leading-none"
               style={{
-                color: "#00FF87",
-                textShadow: "0 0 20px rgba(0,255,135,0.8), 0 0 60px rgba(0,255,135,0.4), 0 0 100px rgba(0,255,135,0.2)",
+                background: "linear-gradient(180deg, #00FF87, #00B4D8)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter: "drop-shadow(0 0 40px rgba(0,255,135,0.6)) drop-shadow(0 0 80px rgba(0,255,135,0.3))",
               }}
             >
               GO!

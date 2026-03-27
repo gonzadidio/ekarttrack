@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pilot {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings  Booking[]
+  lapTimes  LapTime[]
+}
+
+model Kart {
+  id        String   @id @default(cuid())
+  number    Int      @unique
+  name      String
+  status    KartStatus @default(AVAILABLE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+}
+
+enum KartStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  date      DateTime
+  startTime String
+  endTime   String
+  maxPilots Int      @default(10)
+  price     Float
+  status    SessionStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings  Booking[]
+  lapTimes  LapTime[]
+  kart      Kart?    @relation(fields: [kartId], references: [id])
+  kartId    String?
+}
+
+enum SessionStatus {
+  OPEN
+  FULL
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  pilot     Pilot    @relation(fields: [pilotId], references: [id])
+  pilotId   String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId String
+  participants Int      @default(1)
+  status    BookingStatus @default(PENDING)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pilotId, sessionId])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model LapTime {
+  id        String   @id @default(cuid())
+  pilot     Pilot    @relation(fields: [pilotId], references: [id])
+  pilotId   String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId String
+  lapNumber Int
+  time      Float
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}

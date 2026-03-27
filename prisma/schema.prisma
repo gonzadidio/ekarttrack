@@ -36,16 +36,35 @@ enum KartStatus {
   MAINTENANCE
 }
 
+model TurnType {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String?
+  durationMin  Int
+  defaultPrice Float
+  maxPilots    Int      @default(10)
+  color        String?
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  features     String?  // JSON array string
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions     Session[]
+}
+
 model Session {
-  id        String   @id @default(cuid())
-  date      DateTime
-  startTime String
-  endTime   String
-  maxPilots Int      @default(10)
-  price     Float
-  status    SessionStatus @default(OPEN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String        @id @default(cuid())
+  date       DateTime
+  startTime  String
+  endTime    String
+  maxPilots  Int           @default(10)
+  price      Float
+  status     SessionStatus @default(OPEN)
+  turnType   TurnType?     @relation(fields: [turnTypeId], references: [id])
+  turnTypeId String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
   bookings  Booking[]
   lapTimes  LapTime[]
@@ -62,16 +81,16 @@ enum SessionStatus {
 }
 
 model Booking {
-  id        String   @id @default(cuid())
-  pilot     Pilot    @relation(fields: [pilotId], references: [id])
-  pilotId   String
-  session   Session  @relation(fields: [sessionId], references: [id])
-  sessionId String
-  participants Int      @default(1)
-  status    BookingStatus @default(PENDING)
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  pilot        Pilot         @relation(fields: [pilotId], references: [id])
+  pilotId      String
+  session      Session       @relation(fields: [sessionId], references: [id])
+  sessionId    String
+  participants Int           @default(1)
+  status       BookingStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   @@unique([pilotId, sessionId])
 }
@@ -118,4 +137,22 @@ model SiteConfig {
   id    String @id @default(cuid())
   key   String @unique
   value String
+}
+
+model BusinessHours {
+  id        String  @id @default(cuid())
+  dayOfWeek Int     @unique // 0=Domingo ... 6=Sábado
+  isOpen    Boolean @default(true)
+  openTime  String? // "10:00"
+  closeTime String? // "23:00"
+}
+
+model Holiday {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  name      String
+  isClosed  Boolean  @default(true)
+  openTime  String?
+  closeTime String?
+  createdAt DateTime @default(now())
 }
